@@ -31,7 +31,7 @@ export class UserRouter extends BaseRouter {
       method: HTTP_METHOD.GET,
       url: '/profile',
       action: this.userController.getProfile,
-      middleware: [auth([])],
+      middleware: [auth([ROLE.ADMIN])],
     });
     this.route({
       method: HTTP_METHOD.PUT,
@@ -43,7 +43,7 @@ export class UserRouter extends BaseRouter {
       method: HTTP_METHOD.PUT,
       url: '/profile',
       action: this.userController.updateProfile,
-      middleware: [auth([]), uploadDiskStorage.single('avatar'), validation.body(schemaUser)],
+      middleware: [auth([ROLE.ADMIN]), uploadDiskStorage.single('avatar'), validation.body(schemaUser)],
     });
     this.route({
       method: HTTP_METHOD.DELETE,

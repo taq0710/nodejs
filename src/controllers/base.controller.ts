@@ -1,13 +1,17 @@
-import { Response } from 'express';
+import { Response } from "express";
 
-const responseSuccess = (res: Response, message: string = 'Success') => {
+const responseSuccess = (res: Response, message: string = "Success") => {
   res.status(200).json({
     success: true,
     message,
   });
 };
 
-const responseSuccessWithData = (res: Response, data?: any, message: string = 'Success') => {
+const responseSuccessWithData = (
+  res: Response,
+  data?: any,
+  message: string = "Success"
+) => {
   res.status(200).json({
     success: true,
     message,
@@ -15,7 +19,7 @@ const responseSuccessWithData = (res: Response, data?: any, message: string = 'S
   });
 };
 
-const responseError = (res: Response, message: string) => {
+const responseError = (res: Response, message: string): any => {
   return res.status(200).json({
     success: false,
     message,

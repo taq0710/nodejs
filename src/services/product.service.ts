@@ -1,30 +1,33 @@
-import { Model, FilterQuery, Types } from 'mongoose';
-import { LIMIT, SORT_BY } from '../common/constants';
-import { ProductFilter } from '../interfaces/product/product-filter.interface';
-import { IProduct } from '../interfaces/product/product.interface';
-import ProductModel, { IProductModel } from '../models/product.model';
-import { pagination, removeFile } from './base.service';
+import { Model, FilterQuery, Types } from "mongoose";
+import { LIMIT, SORT_BY } from "../common/constants";
+import { ProductFilter } from "../interfaces/product/product-filter.interface";
+import { IProduct } from "../interfaces/product/product.interface";
+import ProductModel, { IProductModel } from "../models/product.model";
+import { pagination, removeFile } from "./base.service";
+import appConfig from "../configs/appConfig";
 
 class ProductService {
   private productModel: Model<IProductModel> = ProductModel;
 
   async getAll(filter: ProductFilter) {
-    const { page = 1, limit = LIMIT, minPrice, maxPrice, name, sortBy, restaurant, status } = filter;
+    const {
+      page = 1,
+      limit = LIMIT,
+      minPrice,
+      maxPrice,
+      name,
+      sortBy,
+    } = filter;
     const where: FilterQuery<IProductModel>[] = [{ isDelete: false }];
 
     if (minPrice) where.push({ unitPrice: { $gte: minPrice } });
 
     if (maxPrice) where.push({ unitPrice: { $lte: maxPrice } });
 
-    if (name) where.push({ name: { $regex: name, $options: 'i' } });
+    if (name) where.push({ name: { $regex: name, $options: "i" } });
 
-    if (status) where.push({ status });
-
-    if (restaurant && Types.ObjectId.isValid(restaurant)) {
-      where.push({ restaurant: new Types.ObjectId(restaurant) });
-    }
-
-    const query: FilterQuery<IProductModel> = where.length > 0 ? { $and: where } : {};
+    const query: FilterQuery<IProductModel> =
+      where.length > 0 ? { $and: where } : {};
 
     const sort: any =
       sortBy == SORT_BY.HIGHT_TO_LOW
@@ -38,7 +41,7 @@ class ProductService {
     const countDocument = this.productModel.countDocuments(query);
     const getProduct = this.productModel
       .find(query)
-      .populate('restaurant', '-createdAt -updatedAt')
+      .populate("restaurant", "-createdAt -updatedAt")
       .skip(page * limit - limit)
       .sort(sort)
       .limit(limit);
@@ -53,13 +56,15 @@ class ProductService {
   }
 
   async getById(id: string) {
-    const product = await this.productModel.findById(id).populate('restaurant', '-createdAt -updatedAt');
-    if (!product) throw new Error('Product does not exist');
+    const product = await this.productModel
+      .findById(id)
+      .populate("restaurant", "-createdAt -updatedAt");
+    if (!product) throw new Error("Product does not exist");
     return product;
   }
 
-  async create(data: IProduct, image?: string) {
-    data.image = `files/${image}`;
+  async create(data: IProduct, file?: Express.Multer.File) {
+    data.image = `http://localhost:${appConfig.env.port}/files/${file?.filename}`;
     const newProduct = new this.productModel(data);
     return newProduct.save();
   }
@@ -71,7 +76,7 @@ class ProductService {
       ...data,
       updatedAt: new Date(),
     });
-    if (!product) throw new Error('Can not update product');
+    if (!product) throw new Error("Can not update product");
 
     if (image && product.image) removeFile(product.image);
 
@@ -79,8 +84,11 @@ class ProductService {
   }
 
   async deleteById(id: string) {
-    const product = await this.productModel.findByIdAndUpdate(id, { isDelete: true, updatedAt: new Date() });
-    if (!product) throw new Error('Can not delete product');
+    const product = await this.productModel.findByIdAndUpdate(id, {
+      isDelete: true,
+      updatedAt: new Date(),
+    });
+    if (!product) throw new Error("Can not delete product");
     if (product.image) removeFile(product.image);
     return product;
   }

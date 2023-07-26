@@ -29,3 +29,4 @@ const stringObjectExtension: Joi.Extension = {
 };
 
 export const JoiObj: ExtendedJoi = Joi.extend(stringObjectExtension);
+
